@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Threat Simulator v3 | HEVS</title>
+
+    <style>
+        /* --- NEO-SEC THEME --- */
+        :root {
+            --bg-body: #0f172a; --bg-sidebar: #020617; --bg-card: #1e293b;
+            --text-main: #f8fafc; --text-muted: #94a3b8;
+            --accent: #38bdf8; --accent-hover: rgba(56, 189, 248, 0.1);
+            --danger: #ef4444; --success: #22c55e; --warning: #f59e0b;
+            --border: #334155;
+            /* Specialized Colors */
+            --wa-bg: #0b141a; --wa-in: #202c33; --wa-out: #005c4b;
+        }
+
+        /* --- GLOBAL RESET --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        aside {
+            width: 320px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; flex-shrink: 0; z-index: 20;
+        }
+
+        .brand-header {
+            padding: 1.5rem; border-bottom: 1px solid var(--border);
+            color: var(--accent); font-weight: 800; letter-spacing: 1px; font-size: 1.1rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        
+        .refresh-btn {
+            background: none; border: 1px solid var(--border); color: var(--text-muted); 
+            border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 0.7rem;
+        }
+        .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* MODE SWITCHER */
+        .mode-switch { display: flex; padding: 10px; gap: 5px; border-bottom: 1px solid var(--border); }
+        .mode-btn {
+            flex: 1; padding: 8px; border: none; background: transparent; color: var(--text-muted);
+            cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 0.85rem; transition: 0.2s;
+        }
+        .mode-btn.active { background: var(--accent); color: #000; }
+        .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.05); }
+
+        /* LIST ITEMS */
+        .item-list { flex: 1; overflow-y: auto; }
+        .list-item {
+            padding: 1rem; border-bottom: 1px solid var(--border); cursor: pointer;
+            display: flex; gap: 12px; align-items: center; transition: 0.2s;
+        }
+        .list-item:hover { background: var(--bg-card); }
+        .list-item.active { background: var(--accent-hover); border-left: 3px solid var(--accent); }
+        .list-item.completed { opacity: 0.4; filter: grayscale(0.8); }
+
+        .item-avatar {
+            width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; font-weight: bold; font-size: 0.9rem; color: #fff; flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .item-info h4 { font-size: 0.9rem; margin-bottom: 3px; color: var(--text-main); }
+        .item-info p { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+
+        .back-link { padding: 1rem; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; border-top: 1px solid var(--border); text-align: center; }
+        .back-link:hover { color: var(--accent); }
+
+        /* --- MAIN AREA --- */
+        main { flex: 1; background: var(--bg-body); position: relative; display: flex; flex-direction: column; }
+        
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100%; color: var(--text-muted); text-align: center;
+        }
+
+        /* VIEW CONTAINERS */
+        .view-container { display: none; width: 100%; height: 100%; animation: fadeIn 0.3s ease-out; }
+        .view-container.visible { display: flex; }
+
+        /* 1. EMAIL MODE STYLES */
+        #email-view { flex-direction: column; padding: 2rem; overflow-y: auto; max-width: 900px; margin: 0 auto; display: none; }
+        #email-view.visible { display: block; }
+        .e-header { padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+        .e-subject { font-size: 1.5rem; margin-bottom: 0.5rem; color: #fff; }
+        .e-body { line-height: 1.6; color: #cbd5e1; margin-bottom: 2rem; font-size: 1rem; }
+        .fake-link { color: var(--accent); text-decoration: underline; cursor: pointer; }
+
+        /* 2. CHAT MODE STYLES (Phone) */
+        #chat-view { justify-content: center; align-items: center; background: #000; }
+        .phone-frame {
+            width: 360px; height: 90%; background: var(--wa-bg); border: 1px solid #333; border-radius: 20px;
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-blend-mode: overlay; background-size: contain; box-shadow: 0 0 20px rgba(255,255,255,0.05);
+        }
+        .chat-bubbles { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .bubble { max-width: 80%; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; color: #fff; position: relative; animation: popIn 0.3s forwards; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .in { align-self: flex-start; background: var(--wa-in); border-top-left-radius: 0; }
+        .out { align-self: flex-end; background: var(--wa-out); border-top-right-radius: 0; }
+
+        /* 3. WEB MODE STYLES (Dynamic Frame) */
+        #web-view { justify-content: center; align-items: center; background: #111; padding: 20px; }
+        .browser-window {
+            width: 100%; max-width: 900px; height: 90%; background: white; border-radius: 8px; overflow: hidden;
+            display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+        .browser-bar { background: #e2e8f0; padding: 10px; display: flex; align-items: center; border-bottom: 1px solid #cbd5e1; }
+        .url-input { 
+            flex: 1; background: white; padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; color: #333; 
+            border: 1px solid #cbd5e1; margin-left: 10px; display: flex; align-items: center; gap: 8px;
+        }
+        .web-content { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; background: #fff; overflow:hidden;}
+        
+        .web-controls { position: absolute; bottom: 20px; right: 20px; z-index: 100; }
+
+        /* COMMON BUTTONS */
+        .action-bar { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; transition: transform 0.1s;}
+        .btn:active { transform: scale(0.98); }
+        .btn-phish { background: var(--danger); }
+        .btn-safe { background: var(--success); }
+        .btn-warn { background: var(--warning); color: #000; }
+
+        /* TOAST */
+        #toast {
+            visibility: hidden; min-width: 300px; background-color: #1e293b; color: #fff; text-align: center;
+            border-radius: 8px; padding: 16px; position: fixed; z-index: 200; left: 50%; bottom: 30px; transform: translateX(-50%);
+            border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 3.5s; }
+        #toast.success { border-color: var(--success); color: var(--success); }
+        #toast.error { border-color: var(--danger); color: var(--danger); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="brand-header">
+            <span>🛡️ THREAT LAB V3</span>
+            <button class="refresh-btn" onclick="location.reload()">↻ New Set</button>
+        </div>
+        
+        <div class="mode-switch">
+            <button class="mode-btn active" onclick="switchMode('email')">✉️ Mail</button>
+            <button class="mode-btn" onclick="switchMode('chat')">💬 Chat</button>
+            <button class="mode-btn" onclick="switchMode('web')">🌐 Web</button>
+        </div>
+
+        <div class="item-list" id="sidebar-list"></div>
+        <a href="index.html" class="back-link">← Return to Dashboard</a>
+    </aside>
+
+    <main>
+        <div id="empty-state" class="empty-state">
+            <div style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem;">🎯</div>
+            <h3>Select a Simulation</h3>
+            <p>6 Random scenarios have been generated for you.</p>
+        </div>
+
+        <div id="email-view" class="view-container">
+            <div class="e-header">
+                <h2 class="e-subject" id="e-subj"></h2>
+                <div style="color:var(--text-muted); margin-top:5px;" id="e-from"></div>
+            </div>
+            <div class="e-body" id="e-body"></div>
+            <div class="action-bar" id="e-actions">
+                <button class="btn btn-phish" onclick="resolve(true)">⚠️ Report Phishing</button>
+                <button class="btn btn-safe" onclick="resolve(false)">✅ Mark Safe</button>
+            </div>
+        </div>
+
+        <div id="chat-view" class="view-container">
+            <div class="phone-frame">
+                <div style="background:#202c33; padding:15px; color:white; font-weight:bold; display:flex; align-items:center; gap:10px;">
+                    <div id="c-avatar" style="width:35px; height:35px; background:#555; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:0.9rem;">?</div>
+                    <span id="c-name">Sender</span>
+                </div>
+                <div class="chat-bubbles" id="c-scroll"></div>
+                <div style="background:#202c33; padding:10px; display:grid; grid-template-columns:1fr 1fr; gap:8px;" id="c-actions">
+                    <button class="btn btn-phish" style="font-size:0.8rem;" onclick="resolve(true)">🔴 Block</button>
+                    <button class="btn btn-warn" style="font-size:0.8rem; color:black;" onclick="resolve(true)">🟡 Call</button>
+                    <button class="btn btn-safe" style="font-size:0.8rem; grid-column:span 2;" onclick="resolve(false)">🟢 Reply</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="web-view" class="view-container">
+            <div class="browser-window">
+                <div class="browser-bar">
+                    <div style="display:flex; gap:5px;">
+                        <div style="width:10px; height:10px; background:#ff5f57; border-radius:50%;"></div>
+                        <div style="width:10px; height:10px; background:#ffbd2e; border-radius:50%;"></div>
+                        <div style="width:10px; height:10px; background:#28c940; border-radius:50%;"></div>
+                    </div>
+                    <div class="url-input">
+                        <span>🔒</span>
+                        <span id="w-url">https://...</span>
+                    </div>
+                </div>
+                <div id="web-content-area" class="web-content"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="toast">Notification</div>
+
+    <script>
+        // --- 1. ENGINE: INFINITE SCENARIO GENERATORS ---
+
+        // Helper: Shuffle Array
+        function shuffle(array) {
+            return array.sort(() => 0.5 - Math.random());
+        }
+
+        // --- EMAIL GENERATOR (Mix & Match Logic) ---
+        function generateEmails() {
+            const senders = [
+                { n: "HR Team", e: "hr@company-portal.com", safe: true },
+                { n: "Netflix", e: "support@net-flix-help.com", safe: false }, // Bad
+                { n: "IT Support", e: "admin@gmai1.com", safe: false }, // Bad
+                { n: "Boss", e: "ceo.private@gmail.com", safe: false }, // CEO Fraud
+                { n: "PayPal", e: "service@paypal.com", safe: true },
+                { n: "LinkedIn", e: "invitations@linkedin.com", safe: true },
+                { n: "Amazon", e: "orders@amazon-support-desk.net", safe: false }, // Bad
+                { n: "Sarah (Manager)", e: "sarah@company.com", safe: true },
+                { n: "Dropbox", e: "no-reply@dropbox.com", safe: true },
+                { n: "Meta", e: "security@facebook-recovery.xy", safe: false } // Bad
+            ];
+
+            const subjects = [
+                { t: "URGENT: Verify Account", type: "bad" },
+                { t: "Monthly Newsletter", type: "good" },
+                { t: "Invoice #9921 Pending", type: "bad" },
+                { t: "Project Update", type: "good" },
+                { t: "Suspicious Login Detected", type: "bad" },
+                { t: "Invitation to connect", type: "good" },
+                { t: "Your Package Delivery", type: "neutral" }
+            ];
+
+            let list = [];
+            let pool = shuffle(senders).slice(0, 6); // Pick 6 random senders
+
+            pool.forEach((s, i) => {
+                let sub = subjects[Math.floor(Math.random() * subjects.length)];
+                
+                // Determine Phishing Status
+                // If Sender is BAD, it's Phishing. 
+                // If Sender is SAFE but Subject is suspiciously mismatched/urgent, we force a "Hack" scenario?
+                // Simplification: Rely mostly on sender domain + subject content logic
+                
+                let isPhish = !s.safe;
+                // If safe sender, but we want to make it tricky? 
+                // For now, let's stick to Sender Safety as primary truth, but inject 'bad' body if sender is bad
+                
+                let body = "";
+                if(isPhish) {
+                    if(s.n === "Boss") body = "I am in a meeting. Can you buy me 5 gift cards? Urgent.";
+                    else body = `Your account is at risk. <span class='fake-link'>Click Here</span> to verify immediately or we will close it.`;
+                } else {
+                    body = "Please review the attached documents at your convenience. Let me know if you have questions.";
+                }
+
+                list.push({
+                    id: "e_" + Math.random().toString(36).substr(2, 5),
+                    mode: 'email',
+                    sender: s.n, email: s.e, subject: sub.t, body: body,
+                    isPhish: isPhish, avatar: s.n[0], 
+                    color: isPhish ? "#f59e0b" : "#3b82f6" // Color hint (debug) or keep uniform
+                });
+            });
+            return list;
+        }
+
+        // --- CHAT GENERATOR (Template Assembly) ---
+        function generateChats() {
+            const templates = [
+                { n: "BankAlert", msg: "Debit Card Blocked. Call 1800-FAKE-BANK.", isPhish: true, a: "🏦" },
+                { n: "Mom", msg: "Call me when you are free.", isPhish: false, a: "M" },
+                { n: "Unknown", msg: "Hi is this David? No? You seem nice let's chat.", isPhish: true, a: "#" }, // Pig Butchering
+                { n: "DeliveryBot", msg: "Package delivery failed. Address invalid. Update here: tinyurl.com/fake", isPhish: true, a: "📦" },
+                { n: "Recruiter", msg: "Hi, I have a job offer, $500/hr. Message me on Telegram.", isPhish: true, a: "💼" },
+                { n: "AuthMsg", msg: "Your Uber code is 4421. Don't share it.", isPhish: false, a: "🛡️" },
+                { n: "Vikram (CEO)", msg: "Send me the file ASAP.", isPhish: false, a: "VR" },
+                { n: "Vikram (CEO)", msg: "I need you to wire transfer money to this vendor now.", isPhish: true, a: "VR" }, // Whaling
+                { n: "Provider", msg: "Your internet bill is overdue. Pay now to avoid disconnection.", isPhish: true, a: "⚡" }
+            ];
+            
+            let list = [];
+            let pool = shuffle(templates).slice(0, 6); // Pick 6 unique scenarios
+
+            pool.forEach(t => {
+                list.push({
+                    id: "c_" + Math.random().toString(36).substr(2, 5),
+                    mode: 'chat', sender: t.n, avatar: t.a,
+                    msgs: [t.msg], isPhish: t.isPhish
+                });
+            });
+            return list;
+        }
+
+        // --- WEB GENERATOR (Template Selection) ---
+        function generateWebs() {
+            // Pool of 8-10 Scenarios
+            const pool = [
+                { 
+                    type: 'login', isPhish: true, url: "sharepoint-secure.net", name: "SharePoint Login",
+                    html: `<div style='background:#f3f4f6; height:100%; display:flex; justify-content:center; align-items:center;'><div style='background:white; padding:30px; border-radius:4px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:300px;'><h3>Sign In</h3><input style='width:100%; margin:10px 0; padding:8px;' placeholder='Email'><button style='width:100%; background:#0078d4; color:white; border:none; padding:10px;'>Next</button></div></div>`
+                },
+                { 
+                    type: 'scam', isPhish: true, url: "windows-alert-system.com", name: "Virus Alert",
+                    html: `<div style='background:blue; color:white; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;'><h1>⚠️ CRITICAL ERROR</h1><br><div style='background:white; color:black; padding:20px; border:4px solid red;'><h3>VIRUS DETECTED</h3><p>Call Support: 1-888-FAKE-NUM</p></div></div>`
+                },
+                { 
+                    type: 'safe', isPhish: false, url: "google.com", name: "Google",
+                    html: `<div style='height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;'><h1 style='color:#444; font-size:3rem;'>Google</h1><input style='border:1px solid #ccc; padding:10px; border-radius:20px; width:50%; margin-top:20px;' placeholder='Search'></div>`
+                },
+                { 
+                    type: 'update', isPhish: true, url: "chrome-update-patch.info", name: "Browser Update",
+                    html: `<div style='background:rgba(0,0,0,0.8); height:100%; display:flex; justify-content:center; align-items:center;'><div style='background:white; padding:30px; text-align:center; border-radius:8px;'><h3>Chrome is Outdated</h3><p>Security risk detected.</p><button style='background:#22c55e; color:white; padding:10px 20px; border:none; margin-top:10px;'>Update Now</button></div></div>`
+                },
+                { 
+                    type: 'crypto', isPhish: true, url: "elon-giveaway-btc.xyz", name: "Free Bitcoin",
+                    html: `<div style='background:#111; color:white; height:100%; padding:20px; text-align:center;'><h1>ELON MUSK GIVEAWAY</h1><p>Send 1 BTC, Get 2 BTC back!</p><div style='border:1px dashed orange; padding:10px; margin:20px;'>Wallet: 1FakeAddress...</div></div>`
+                },
+                { 
+                    type: 'safe', isPhish: false, url: "amazon.com/product/123", name: "Amazon Product",
+                    html: `<div style='padding:20px;'><h2 style='color:#333;'>Wireless Headphones</h2><p style='color:#b12704; font-size:1.2rem;'>$29.99</p><button style='background:#f0c14b; border:1px solid #a88734; padding:5px 15px;'>Add to Cart</button><p>Sold by Official Store</p></div>`
+                },
+                {
+                     type: 'captcha', isPhish: true, url: "verify-human.site", name: "Fake Captcha",
+                     html: `<div style='height:100%; display:flex; justify-content:center; align-items:center;'><div style='border:1px solid #ccc; padding:20px; text-align:center;'><h3>Verify you are human</h3><p>Click "Allow" on notifications to continue.</p><button>I am not a robot</button></div></div>`
+                },
+                {
+                     type: '404', isPhish: false, url: "company.com/old-page", name: "404 Error",
+                     html: `<div style='padding:50px; text-align:center;'><h1>404</h1><p>Page not found.</p><a href='#'>Go Home</a></div>`
+                }
+            ];
+
+            let list = [];
+            let selection = shuffle(pool).slice(0, 6);
+            
+            selection.forEach(s => {
+                list.push({
+                    id: "w_" + Math.random().toString(36).substr(2, 5),
+                    mode: 'web', type: s.type, isPhish: s.isPhish,
+                    url: s.url, name: s.name, html: s.html
+                });
+            });
+            return list;
+        }
+
+        // --- 2. STATE MANAGEMENT ---
+        let currentMode = 'email';
+        let dataStore = {
+            email: generateEmails(),
+            chat: generateChats(),
+            web: generateWebs()
+        };
+        let currentItem = null;
+        let answeredIds = []; // Session based (reset on reload)
+
+        // --- 3. UI LOGIC ---
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            renderSidebar();
+            resetView();
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('sidebar-list');
+            list.innerHTML = '';
+            
+            dataStore[currentMode].forEach(item => {
+                const isDone = answeredIds.includes(item.id);
+                const div = document.createElement('div');
+                div.className = `list-item ${isDone ? 'completed' : ''}`;
+                div.onclick = () => loadItem(item, div);
+                
+                let title = item.sender || item.name; 
+                let sub = item.subject || (item.mode === 'web' ? item.url : 'Message');
+
+                div.innerHTML = `
+                    <div class="item-avatar" style="background:${item.color || '#334155'}">${item.avatar || (item.mode==='web'?'🌐':'#')}</div>
+                    <div class="item-info">
+                        <h4>${title}</h4>
+                        <p>${sub}</p>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function loadItem(item, el) {
+            currentItem = item;
+            document.querySelectorAll('.list-item').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+            
+            document.getElementById('empty-state').style.display = 'none';
+            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('visible'));
+            document.getElementById(`${item.mode}-view`).classList.add('visible');
+
+            // --- RENDER EMAIL ---
+            if(item.mode === 'email') {
+                document.getElementById('e-subj').innerText = item.subject;
+                document.getElementById('e-from').innerText = `${item.sender} <${item.email}>`;
+                document.getElementById('e-body').innerHTML = item.body;
+                toggleActions('e-actions', item.id);
+            } 
+            // --- RENDER CHAT ---
+            else if(item.mode === 'chat') {
+                document.getElementById('c-name').innerText = item.sender;
+                document.getElementById('c-avatar').innerText = item.avatar;
+                const scroll = document.getElementById('c-scroll');
+                scroll.innerHTML = '';
+                item.msgs.forEach(t => scroll.innerHTML += `<div class="bubble in">${t}</div>`);
+                toggleActions('c-actions', item.id);
+            }
+            // --- RENDER WEB ---
+            else if(item.mode === 'web') {
+                document.getElementById('w-url').innerText = "https://" + item.url;
+                document.getElementById('web-content-area').innerHTML = item.html + 
+                    `<div class='web-controls'>
+                        <button class='btn btn-phish' onclick='resolve(true)'>🚨 Report</button>
+                        <button class='btn btn-safe' style='margin-left:10px' onclick='resolve(false)'>✅ Trust</button>
+                    </div>`;
+                
+                if(answeredIds.includes(item.id)) {
+                    document.querySelector('.web-controls').style.display = 'none';
+                }
+            }
+        }
+
+        function toggleActions(id, itemId) {
+            const el = document.getElementById(id);
+            if(answeredIds.includes(itemId)) el.style.opacity = '0.2'; 
+            else el.style.opacity = '1';
+        }
+
+        function resetView() {
+            document.getElementById('empty-state').style.display = 'flex';
+            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('visible'));
+        }
+
+        // --- 4. SCORING ---
+        function resolve(userSaidBad) {
+            if(answeredIds.includes(currentItem.id)) return;
+
+            let pass = (currentItem.isPhish && userSaidBad) || (!currentItem.isPhish && !userSaidBad);
+
+            if(pass) {
+                showToast("✅ Correct Decision!", "success");
+                updateScore(1);
+            } else {
+                let msg = currentItem.isPhish ? "❌ Failed: You trusted a threat." : "⚠️ Caution: You blocked safe content.";
+                showToast(msg, "error");
+                updateScore(0);
+            }
+
+            answeredIds.push(currentItem.id);
+            renderSidebar(); 
+            if(currentMode === 'web') document.querySelector('.web-controls').style.display = 'none';
+        }
+
+        function updateScore(point) {
+            let hits = parseInt(localStorage.getItem('hevs_hits')) || 0;
+            let total = parseInt(localStorage.getItem('hevs_total')) || 0;
+            if(point === 1) hits++;
+            total++;
+            localStorage.setItem('hevs_hits', hits);
+            localStorage.setItem('hevs_total', total);
+            let percent = Math.round((hits / total) * 100);
+            localStorage.setItem('hevs_phishing_score', percent);
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `show ${type}`;
+            setTimeout(() => t.className = t.className.replace("show", ""), 2500);
+        }
+
+        // Initialize First View
+        renderSidebar();
+
+    </script>
+</body>
+</html>

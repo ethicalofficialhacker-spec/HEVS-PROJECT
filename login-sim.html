@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Simulation | HEVS</title>
+    <style>
+        /* --- THEME: CORPORATE (The Trap) --- */
+        :root {
+            --corp-bg: #f3f4f6;
+            --corp-blue: #0067b8; /* Microsoft Blue-ish */
+            --corp-text: #1b1b1b;
+            --neo-bg: #0f172a;
+            --neo-accent: #38bdf8;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- FAKE BROWSER CHROME --- */
+        .browser-bar {
+            background: #e2e8f0;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .browser-controls { display: flex; gap: 8px; margin-right: 15px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; }
+        
+        .url-bar {
+            flex: 1;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            border: 1px solid #cbd5e1;
+        }
+        .lock-icon { color: #16a34a; margin-right: 8px; font-size: 0.8rem; }
+        .domain-text { color: #333; }
+
+        /* --- THE TRAP CONTENT (Fake Login) --- */
+        .viewport {
+            flex: 1;
+            background-image: url('https://img.freepik.com/free-vector/white-gray-geometric-pattern-background-vector_53876-136510.jpg'); /* Generic Corp Background */
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        .logo-area { font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.9rem; margin-bottom: 5px; color: #555; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; font-size: 1rem; }
+        
+        .login-btn {
+            background: var(--corp-blue);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .login-btn:hover { opacity: 0.9; }
+
+        /* --- HEVS OVERLAY UI (The Test Controls) --- */
+        .hevs-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .hevs-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .btn-report { background: var(--danger); color: white; }
+        .btn-report:hover { transform: scale(1.05); }
+
+        /* --- MODAL (Neo-Sec Theme) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: none; justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        .modal-card {
+            background: #1e293b; color: #f8fafc;
+            padding: 2rem; border-radius: 12px;
+            max-width: 500px; text-align: center;
+            border: 1px solid #334155;
+        }
+        .modal-title { font-size: 1.8rem; margin-bottom: 1rem; }
+        .modal-body { color: #94a3b8; margin-bottom: 2rem; line-height: 1.6; }
+        .highlight { color: var(--neo-accent); font-weight: bold; font-family: monospace; background: rgba(56, 189, 248, 0.1); padding: 2px 5px; }
+        
+        .action-btn {
+            background: var(--neo-accent); color: #0f172a; text-decoration: none;
+            padding: 10px 20px; border-radius: 6px; font-weight: bold; display: inline-block;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="browser-bar">
+        <div class="browser-controls">
+            <div class="dot" style="background:#ff5f57"></div>
+            <div class="dot" style="background:#ffbd2e"></div>
+            <div class="dot" style="background:#28c940"></div>
+        </div>
+        <div class="url-bar">
+            <span class="lock-icon">🔒</span>
+            <span class="domain-text">https://secure-login.micros0ft-sharepoint.com/auth/v2</span>
+        </div>
+    </div>
+
+    <div class="viewport">
+        <div class="login-box">
+            <div class="logo-area">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect width="10" height="10" x="1" y="1" fill="#f25022"/><rect width="10" height="10" x="12" y="1" fill="#7fba00"/><rect width="10" height="10" x="1" y="12" fill="#00a4ef"/><rect width="10" height="10" x="12" y="12" fill="#ffb900"/></svg>
+                <span>Sign in</span>
+            </div>
+            <p style="margin-bottom:20px; color:#666;">to continue to SharePoint</p>
+            
+            <div class="input-group">
+                <input type="email" placeholder="Email, phone, or Skype" id="fake-email">
+            </div>
+            <div class="input-group">
+                <input type="password" placeholder="Password" id="fake-pass">
+            </div>
+            <button class="login-btn" onclick="attemptLogin()">Next</button>
+            <p style="margin-top:20px; font-size:0.8rem; color:#0067b8;">Can't access your account?</p>
+        </div>
+
+        <div class="hevs-controls">
+            <button class="hevs-btn btn-report" onclick="reportPage()">🚨 Report Suspicious Page</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="result-modal">
+        <div class="modal-card">
+            <h2 class="modal-title" id="m-title"></h2>
+            <div class="modal-body" id="m-body"></div>
+            <a href="index.html" class="action-btn">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        function attemptLogin() {
+            // If they click Login, they FAILED
+            showResult(false);
+        }
+
+        function reportPage() {
+            // If they click Report, they PASSED
+            showResult(true);
+        }
+
+        function showResult(isSuccess) {
+            const modal = document.getElementById('result-modal');
+            const title = document.getElementById('m-title');
+            const body = document.getElementById('m-body');
+            
+            modal.style.display = 'flex';
+
+            if(isSuccess) {
+                title.innerText = "✅ Credential Theft Blocked";
+                title.style.color = "var(--success)";
+                body.innerHTML = `Great eye! You noticed the suspicious URL: <br><br> 
+                                  <span class="highlight">micros0ft-sharepoint.com</span> <br><br>
+                                  Legitimate Microsoft pages strictly use <b>microsoft.com</b>. You saved your credentials.`;
+                updateScore(100);
+            } else {
+                title.innerText = "❌ Credentials Stolen";
+                title.style.color = "var(--danger)";
+                body.innerHTML = `You entered data into a fake site. Attackers now have your password.
+                                  <br><br><b>The Clue:</b> Look at the address bar above. It says <span class="highlight">micros0ft</span> (with a zero), not microsoft.`;
+                updateScore(0);
+            }
+        }
+
+        function updateScore(points) {
+            // Reuse Phishing Score for simplicity, or create a new 'Web Score'
+            let current = parseInt(localStorage.getItem('hevs_phishing_score')) || 0;
+            let newScore = Math.round((current + points) / 2);
+            localStorage.setItem('hevs_phishing_score', newScore);
+        }
+    </script>
+</body>
+</html>

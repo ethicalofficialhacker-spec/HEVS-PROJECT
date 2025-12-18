@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HEVS Dashboard: Monitor your human vulnerability status against phishing and social engineering attacks.">
+    <title>Dashboard | HEVS Security</title>
+
+    <style>
+        /* --- NEO-SEC THEME VARIABLES --- */
+        :root {
+            --bg-body: #0f172a;       /* Deep Slate */
+            --bg-card: #1e293b;       /* Lighter Slate */
+            --text-main: #f8fafc;     /* White/Grey */
+            --text-muted: #94a3b8;    /* Muted Grey */
+            --accent: #38bdf8;        /* Cyber Blue */
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --success: #22c55e;       /* Neon Green */
+            --danger: #ef4444;        /* Alert Red */
+            --border: #334155;
+            --radius: 12px;
+        }
+
+        /* --- GLOBAL RESET --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 1.2rem 5%;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { 
+            font-weight: 800; 
+            font-size: 1.5rem; 
+            color: var(--accent); 
+            text-decoration: none; 
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .reset-btn:hover { background: var(--danger); color: white; }
+
+        /* --- HERO SECTION --- */
+        header {
+            text-align: center;
+            padding: 4rem 1rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        
+        p.subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- DASHBOARD GRID --- */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        /* --- CARDS --- */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            /* Removed relative position to use Flexbox layout instead */
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            border-color: var(--accent);
+        }
+
+        /* NEW HEADER LAYOUT FIX */
+        .card-header {
+            display: flex;
+            justify-content: space-between; /* Pushes title left, badge right */
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap; /* Allows wrapping on very small screens */
+        }
+
+        .card h2 { 
+            font-size: 1.5rem; 
+            margin: 0; 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+
+        .status-badge {
+            /* No longer absolute */
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background: var(--bg-body);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            white-space: nowrap; /* Prevents text inside badge breaking */
+        }
+        .status-badge.done { border-color: var(--success); color: var(--success); background: rgba(34, 197, 94, 0.1); }
+
+        .card p { color: var(--text-muted); margin-bottom: 2rem; flex: 1; }
+
+        /* --- BUTTONS --- */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            text-align: center;
+            background: var(--accent);
+            color: var(--bg-body);
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: var(--radius);
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            box-shadow: 0 0 15px var(--accent-glow);
+            transform: scale(1.02);
+        }
+        .btn.secondary {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        .btn.secondary:hover {
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        /* --- FINAL REPORT SECTION --- */
+        .report-section {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--bg-card), #172033);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 3rem;
+            text-align: center;
+            display: none; 
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 1rem 0;
+            line-height: 1;
+        }
+        .security-msg { font-size: 1.2rem; color: var(--text-muted); }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--border);
+            font-size: 0.9rem;
+            border-top: 1px solid #1e293b;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">HEVS SHIELD</a>
+        <button class="reset-btn" onclick="resetProgress()">⚠ Reset Data</button>
+    </nav>
+
+    <header>
+        <h1>Human Vulnerability Scanner</h1>
+        <p class="subtitle">A privacy-first, static assessment tool for social engineering resilience.</p>
+    </header>
+
+    <main>
+        <article class="card">
+            <div class="card-header">
+                <h2><span style="color: var(--accent);">📧</span> Phishing Test</h2>
+                <span id="phish-status" class="status-badge">Pending</span>
+            </div>
+            
+            <p>Enter a high-fidelity email client simulation. Can you distinguish legitimate business requests from spear-phishing attacks?</p>
+            <div id="phish-progress" style="height:4px; width:0%; background:var(--accent); margin-bottom:1rem; transition:width 1s;"></div>
+            <a href="phishing.html" class="btn">Launch Simulator</a>
+        </article>
+
+        <article class="card">
+            <div class="card-header">
+                <h2><span style="color: var(--accent);">🧠</span> Knowledge Quiz</h2>
+                <span id="quiz-status" class="status-badge">Pending</span>
+            </div>
+
+            <p>Evaluate your theoretical understanding of password hygiene, ransomware, and secure browsing protocols.</p>
+            <div id="quiz-progress" style="height:4px; width:0%; background:var(--accent); margin-bottom:1rem; transition:width 1s;"></div>
+            <a href="quiz.html" class="btn secondary">Start Quiz</a>
+        </article>
+
+        <section id="report-panel" class="report-section">
+            <h2 style="color: var(--text-main); margin-bottom:10px;">Security Profile Analysis</h2>
+            <div id="final-score" class="score-display">0%</div>
+            <p id="final-msg" class="security-msg">Calculating risk exposure...</p>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2025 HEVS Project. Local Client-Side Execution Only.
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkProgress();
+        });
+
+        function checkProgress() {
+            const quizScore = localStorage.getItem('hevs_quiz_score');
+            const phishScore = localStorage.getItem('hevs_phishing_score');
+
+            if (quizScore !== null) updateCard('quiz', quizScore);
+            if (phishScore !== null) updateCard('phish', phishScore);
+
+            if (quizScore !== null && phishScore !== null) {
+                const total = Math.round((parseInt(quizScore) + parseInt(phishScore)) / 2);
+                showReport(total);
+            }
+        }
+
+        function updateCard(type, score) {
+            const badge = document.getElementById(`${type}-status`);
+            const bar = document.getElementById(`${type}-progress`);
+            const btn = badge.parentElement.parentElement.querySelector('a'); // Adjusted selector due to new div wrapper
+
+            badge.textContent = `Completed: ${score}%`;
+            badge.classList.add('done');
+            
+            bar.style.width = '100%';
+            
+            if(score < 50) {
+                badge.style.color = 'var(--danger)';
+                badge.style.borderColor = 'var(--danger)';
+                bar.style.background = 'var(--danger)';
+            }
+            btn.textContent = "Retake Module";
+        }
+
+        function showReport(score) {
+            const panel = document.getElementById('report-panel');
+            const scoreDisplay = document.getElementById('final-score');
+            const msgDisplay = document.getElementById('final-msg');
+
+            panel.style.display = 'block';
+            
+            let current = 0;
+            const timer = setInterval(() => {
+                current += 1;
+                scoreDisplay.textContent = `${current}%`;
+                
+                if(current < 50) scoreDisplay.style.color = 'var(--danger)';
+                else if(current < 80) scoreDisplay.style.color = 'orange';
+                else scoreDisplay.style.color = 'var(--success)';
+
+                if(current >= score) clearInterval(timer);
+            }, 10);
+
+            if (score >= 80) {
+                msgDisplay.innerHTML = "Status: <strong style='color:var(--success)'>SECURE</strong>. You are a strong human firewall.";
+            } else if (score >= 50) {
+                msgDisplay.innerHTML = "Status: <strong style='color:orange'>MODERATE</strong>. Review the training materials.";
+            } else {
+                msgDisplay.innerHTML = "Status: <strong style='color:var(--danger)'>VULNERABLE</strong>. Immediate security awareness training required.";
+            }
+        }
+
+        function resetProgress() {
+            if(confirm("This will erase your exam results. Continue?")) {
+                localStorage.clear();
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

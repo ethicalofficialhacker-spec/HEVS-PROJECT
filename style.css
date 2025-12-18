@@ -1,0 +1,301 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+}
+
+.login-container {
+    background-color: #111;
+    padding: 35px;
+    width: 350px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+
+.login-container h1 {
+    margin-bottom: 5px;
+    color: #00e6e6;
+}
+
+.tagline {
+    font-size: 14px;
+    margin-bottom: 25px;
+    color: #cccccc;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.login-form label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.login-form input {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+}
+
+.login-form button {
+    padding: 10px;
+    background-color: #00e6e6;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #000;
+    transition: 0.3s;
+}
+
+.login-form button:hover {
+    background-color: #00b3b3;
+}
+
+.info-text {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #aaaaaa;
+}
+/* DASHBOARD STYLES */
+
+.dashboard-container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 40px auto;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+    color: #00e6e6;
+}
+
+.score-section {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.score-card {
+    background-color: #111;
+    padding: 20px;
+    border-radius: 10px;
+    width: 280px;
+    text-align: center;
+    box-shadow: 0px 0px 15px rgba(0,0,0,0.6);
+}
+
+.score-card h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.score-value {
+    font-size: 40px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.score-value.high {
+    color: #ff4d4d;
+}
+
+.risk-label {
+    font-weight: bold;
+}
+
+.risk-flag {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.risk-flag.red {
+    background-color: #ff4d4d;
+    color: #000;
+}
+
+.risk-flag.yellow {
+    background-color: #ffc107;
+    color: #000;
+}
+
+/* TRAINING */
+
+.training-section {
+    background-color: #111;
+    padding: 25px;
+    border-radius: 10px;
+    margin-top: 30px;
+}
+
+.training-section h2 {
+    margin-bottom: 15px;
+    color: #00e6e6;
+}
+
+.training-section ul {
+    list-style: none;
+}
+
+.training-section li {
+    margin-bottom: 8px;
+}
+
+/* ACTION BUTTONS */
+
+.action-section {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.action-btn {
+    display: inline-block;
+    margin: 8px;
+    padding: 12px 20px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #000;
+    background-color: #cccccc;
+    transition: 0.3s;
+}
+
+.action-btn.primary {
+    background-color: #00e6e6;
+}
+
+.action-btn.danger {
+    background-color: #ff4d4d;
+}
+
+.action-btn:hover {
+    opacity: 0.8;
+}
+/* PHISHING EMAIL STYLE */
+
+.email-container {
+    background-color: #ffffff;
+    color: #000;
+    width: 90%;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 25px;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0px 0px 20px rgba(0,0,0,0.4);
+}
+
+.email-header {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    font-size: 14px;
+}
+
+.email-body {
+    margin-top: 15px;
+    font-size: 15px;
+}
+
+.email-action {
+    text-align: center;
+    margin: 25px 0;
+}
+
+.phish-btn {
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.phish-btn:hover {
+    background-color: #0056b3;
+}
+
+.email-footer {
+    font-size: 13px;
+    color: #555;
+    margin-top: 15px;
+}
+/* QUIZ PAGE */
+
+.quiz-container {
+    background-color: #111;
+    width: 90%;
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px rgba(0,0,0,0.7);
+}
+
+.quiz-container h1 {
+    text-align: center;
+    color: #00e6e6;
+    margin-bottom: 10px;
+}
+
+.quiz-subtitle {
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 25px;
+    color: #cccccc;
+}
+
+.quiz-question {
+    margin-bottom: 20px;
+}
+
+.quiz-question p {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.quiz-question label {
+    display: block;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.quiz-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #00e6e6;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.quiz-btn:hover {
+    background-color: #00b3b3;
+}
